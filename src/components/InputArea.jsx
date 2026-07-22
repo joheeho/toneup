@@ -1,0 +1,40 @@
+const EXAMPLES = [
+  "내일까지 자료 보내주세요 빨리요",
+  "회의 시간 바꿔야 되는데 가능한지 확인 좀",
+  "그 건 못 도와드릴 것 같아요 바빠서",
+  "발표자료 검토 부탁드려요 급해요",
+];
+
+export default function InputArea({ value, onChange }) {
+  return (
+    <div className="flex h-full flex-col gap-3">
+      <div>
+        <h2 className="text-sm font-semibold text-ink">거친 메모</h2>
+        <p className="mt-1 text-xs text-ink-soft">
+          다듬고 싶은 문장을 편하게 적어주세요.
+        </p>
+      </div>
+
+      <textarea
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder="예: 내일까지 자료 보내주세요 빨리요"
+        rows={10}
+        className="flex-1 resize-none rounded-lg border border-paper-line bg-white/60 p-4 text-sm leading-relaxed text-ink placeholder:text-ink-soft/60 focus:border-seal focus:outline-none focus:ring-1 focus:ring-seal"
+      />
+
+      <div className="flex flex-wrap gap-2">
+        {EXAMPLES.map((example) => (
+          <button
+            key={example}
+            type="button"
+            onClick={() => onChange(example)}
+            className="rounded-full border border-paper-line bg-white/50 px-3 py-1 text-xs text-ink-soft transition-colors hover:border-seal hover:text-seal"
+          >
+            {example}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
