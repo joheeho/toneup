@@ -9,7 +9,6 @@ const USE_MOCK = true;
 const GEMINI_BASE_URL = "https://generativelanguage.googleapis.com/v1beta/openai/";
 const MODEL = "gemini-2.0-flash";
 
-// 💡 language 매개변수 추가
 function getMockResult(rawText, tone, language) {
   const toneInfo = TONES.find((t) => t.id === tone);
   const label = toneInfo ? toneInfo.label : tone;
@@ -27,7 +26,6 @@ function getMockResult(rawText, tone, language) {
   };
 }
 
-// 💡 language 매개변수 추가
 function buildPrompt(rawText, tone, language) {
   const toneInfo = TONES.find((t) => t.id === tone);
   if (!toneInfo) {
@@ -71,7 +69,6 @@ export async function convertEmail({ rawText, tone, language = "ko", apiKey }) {
   }
 
   if (USE_MOCK) {
-    // 💡 language 인자 전달
     return getMockResult(rawText, tone, language);
   }
 
@@ -89,7 +86,6 @@ export async function convertEmail({ rawText, tone, language = "ko", apiKey }) {
   try {
     response = await client.chat.completions.create({
       model: MODEL,
-      // 💡 language 인자 전달
       messages: [{ role: "user", content: buildPrompt(rawText, tone, language) }],
       response_format: { type: "json_object" },
     });

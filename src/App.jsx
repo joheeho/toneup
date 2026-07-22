@@ -93,7 +93,6 @@ export default function App() {
               result={result}
               loading={loading}
               error={error}
-              rawText={rawText}
             />
           </div>
         </div>
