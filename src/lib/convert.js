@@ -1,13 +1,22 @@
-import OpenAI from "openai";
+import Anthropic from "@anthropic-ai/sdk";
 import { BASE_RULE, TONES } from "../prompts/tones.js";
 
 // true로 두면 실제 API를 호출하지 않고 가짜 결과를 돌려줍니다.
 // API 키가 없어도 화면 전체를 테스트할 수 있습니다.
 // 실제 AI 연결을 확인할 때는 false로 바꾸세요.
-const USE_MOCK = true;
+const USE_MOCK = false;
 
-const GEMINI_BASE_URL = "https://generativelanguage.googleapis.com/v1beta/openai/";
-const MODEL = "gemini-2.0-flash";
+const MODEL = "claude-opus-4-8";
+
+const RESULT_SCHEMA = {
+  type: "object",
+  properties: {
+    subject: { type: "string" },
+    body: { type: "string" },
+  },
+  required: ["subject", "body"],
+  additionalProperties: false,
+};
 
 function getMockResult(rawText, tone) {
   const toneInfo = TONES.find((t) => t.id === tone);
@@ -30,22 +39,7 @@ function buildPrompt(rawText, tone) {
 ${toneInfo.instruction}
 
 [거친 메모]
-${rawText}
-
-아래 JSON 형식으로만 답변하세요. 다른 설명은 붙이지 마세요.
-{"subject": "이메일 제목", "body": "이메일 본문"}`;
-}
-
-function parseResponse(content) {
-  try {
-    const parsed = JSON.parse(content);
-    if (typeof parsed.subject === "string" && typeof parsed.body === "string") {
-      return { subject: parsed.subject, body: parsed.body };
-    }
-  } catch {
-    // JSON이 아니면 아래에서 에러를 던집니다.
-  }
-  throw new Error("AI 응답을 이해할 수 없습니다. 다시 시도해주세요.");
+${rawText}`;
 }
 
 export async function convertEmail({ rawText, tone, apiKey }) {
@@ -61,27 +55,28 @@ export async function convertEmail({ rawText, tone, apiKey }) {
     throw new Error("API 키가 설정되지 않았습니다. .env.local 파일을 확인해주세요.");
   }
 
-  const client = new OpenAI({
+  const client = new Anthropic({
     apiKey,
-    baseURL: GEMINI_BASE_URL,
     dangerouslyAllowBrowser: true,
   });
 
   let response;
   try {
-    response = await client.chat.completions.create({
+    response = await client.messages.create({
       model: MODEL,
+      max_tokens: 1024,
+      output_config: { format: { type: "json_schema", schema: RESULT_SCHEMA } },
       messages: [{ role: "user", content: buildPrompt(rawText, tone) }],
-      response_format: { type: "json_object" },
     });
   } catch {
     throw new Error("AI 호출에 실패했습니다. 네트워크와 API 키를 확인해주세요.");
   }
 
-  const content = response?.choices?.[0]?.message?.content;
-  if (!content) {
+  const textBlock = response.content.find((block) => block.type === "text");
+  if (!textBlock) {
     throw new Error("AI가 빈 응답을 반환했습니다. 다시 시도해주세요.");
   }
 
-  return parseResponse(content);
+  const parsed = JSON.parse(textBlock.text);
+  return { subject: parsed.subject, body: parsed.body };
 }
