@@ -4,7 +4,7 @@ import ToneSelector from "./components/ToneSelector.jsx";
 import ResultCard from "./components/ResultCard.jsx";
 import { convertEmail } from "./lib/convert.js";
 
-const API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
+const API_KEY = import.meta.env.VITE_CLAUDE_API_KEY;
 
 export default function App() {
   const [rawText, setRawText] = useState("");
