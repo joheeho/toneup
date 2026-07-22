@@ -5,6 +5,7 @@ import ResultCard from "./components/ResultCard.jsx";
 import { convertEmail } from "./lib/convert.js";
 
 const API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
+const MAX_LENGTH = 500;
 
 export default function App() {
   const [rawText, setRawText] = useState("");
@@ -13,7 +14,14 @@ export default function App() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
+  const isOverLimit = rawText.length > MAX_LENGTH;
+
   const handleConvert = async () => {
+    if (isOverLimit) {
+      setError(`최대 ${MAX_LENGTH}자까지만 입력할 수 있습니다.`);
+      return;
+    }
+
     setLoading(true);
     setError(null);
     setResult(null);
@@ -48,7 +56,7 @@ export default function App() {
             <button
               type="button"
               onClick={handleConvert}
-              disabled={loading || !rawText.trim()}
+              disabled={loading || !rawText.trim() || isOverLimit}
               className="w-full rounded-lg bg-seal py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
             >
               {loading ? "변환 중..." : "정중한 메일로 바꾸기"}
