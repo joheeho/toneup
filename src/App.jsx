@@ -1,5 +1,5 @@
 import { useState } from "react";
-import InputArea from "./components/InputArea.jsx";
+import InputArea, { MAX_LENGTH } from "./components/InputArea.jsx";
 import ToneSelector from "./components/ToneSelector.jsx";
 import ResultCard from "./components/ResultCard.jsx";
 import { convertEmail } from "./lib/convert.js";
@@ -12,6 +12,8 @@ export default function App() {
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+
+  const isOverLimit = rawText.length > MAX_LENGTH;
 
   const handleConvert = async () => {
     setLoading(true);
@@ -48,7 +50,7 @@ export default function App() {
             <button
               type="button"
               onClick={handleConvert}
-              disabled={loading || !rawText.trim()}
+              disabled={loading || !rawText.trim() || isOverLimit}
               className="w-full rounded-lg bg-seal py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
             >
               {loading ? "변환 중..." : "정중한 메일로 바꾸기"}
