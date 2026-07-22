@@ -9,6 +9,7 @@ const API_KEY = import.meta.env.VITE_CLAUDE_API_KEY;
 export default function App() {
   const [rawText, setRawText] = useState("");
   const [toneId, setToneId] = useState("boss");
+  const [language, setLanguage] = useState("ko"); // 언어 상태: "ko" | "en"
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -21,6 +22,7 @@ export default function App() {
       const converted = await convertEmail({
         rawText,
         tone: toneId,
+        language,
         apiKey: API_KEY,
       });
       setResult(converted);
@@ -44,7 +46,38 @@ export default function App() {
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
           <div className="flex flex-col gap-6 rounded-xl border border-paper-line bg-white/40 p-5 shadow-sm">
             <InputArea value={rawText} onChange={setRawText} />
+
+            {/* 언어 선택 토글 영역 */}
+            <div className="flex items-center justify-between rounded-lg border border-paper-line bg-white/60 p-3">
+              <span className="text-xs font-semibold text-ink">출력 언어</span>
+              <div className="flex rounded-md bg-paper p-1 border border-paper-line">
+                <button
+                  type="button"
+                  onClick={() => setLanguage("ko")}
+                  className={`px-3 py-1 text-xs font-medium rounded transition-colors ${
+                    language === "ko"
+                      ? "bg-seal text-white font-bold"
+                      : "text-ink-soft hover:text-ink"
+                  }`}
+                >
+                  한국어 🇰🇷
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setLanguage("en")}
+                  className={`px-3 py-1 text-xs font-medium rounded transition-colors ${
+                    language === "en"
+                      ? "bg-seal text-white font-bold"
+                      : "text-ink-soft hover:text-ink"
+                  }`}
+                >
+                  English 🇺🇸
+                </button>
+              </div>
+            </div>
+
             <ToneSelector toneId={toneId} onChange={setToneId} />
+
             <button
               type="button"
               onClick={handleConvert}
@@ -56,7 +89,11 @@ export default function App() {
           </div>
 
           <div className="rounded-xl border border-paper-line bg-white/40 p-5 shadow-sm">
-            <ResultCard result={result} loading={loading} error={error} />
+            <ResultCard
+              result={result}
+              loading={loading}
+              error={error}
+            />
           </div>
         </div>
       </div>
