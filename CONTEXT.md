@@ -76,20 +76,22 @@ export async function convertEmail({ rawText, tone, apiKey }) {
 - 출력: `{ subject, body }` 형태의 객체 (Promise)
 - `App.jsx`에서 `convertEmail({ rawText, tone: toneId, apiKey: API_KEY })` 형태로 호출됩니다.
 
-### `TONES`의 id 4개 (`src/prompts/tones.js`)
+### `TONES`의 id 6개 (`src/prompts/tones.js`)
 
 ```js
 export const TONES = [
-  { id: "boss", label: "상사 보고", ... },
-  { id: "professor", label: "교수님께", ... },
-  { id: "request", label: "협조 요청", ... },
-  { id: "decline", label: "정중한 거절", ... },
+  { id: "boss", label: "상사", ... },
+  { id: "professor", label: "교수님", ... },
+  { id: "clients", label: "고객사", ... },
+  { id: "teammate", label: "팀원", ... },
+  { id: "senior", label: "선배 / 멘토", ... },
+  { id: "general", label: "기타 (일반 비즈니스)", ... },
 ];
 ```
 
-톤을 추가/삭제하는 게 아니라면 이 4개의 `id` 값(`boss`, `professor`, `request`, `decline`)은
-그대로 유지합니다. `ToneSelector.jsx`, `App.jsx`의 기본값(`"boss"`) 등 여러 곳에서 이 문자열을
-그대로 참조하고 있기 때문에, id를 바꾸면 다른 파일이 깨집니다.
+톤을 추가/삭제하는 게 아니라면 이 6개의 `id` 값(`boss`, `professor`, `clients`, `teammate`,
+`senior`, `general`)은 그대로 유지합니다. `ToneSelector.jsx`, `App.jsx`의 기본값(`"boss"`) 등
+여러 곳에서 이 문자열을 그대로 참조하고 있기 때문에, id를 바꾸면 다른 파일이 깨집니다.
 
 ---
 
