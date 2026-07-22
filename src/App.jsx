@@ -2,6 +2,7 @@ import { useState } from "react";
 import InputArea from "./components/InputArea.jsx";
 import ToneSelector from "./components/ToneSelector.jsx";
 import ResultCard from "./components/ResultCard.jsx";
+import ApiKeyPanel from "./components/ApiKeyPanel.jsx";
 import { convertEmail } from "./lib/convert.js";
 
 const API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
@@ -12,6 +13,7 @@ export default function App() {
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [apiKey, setApiKey] = useState(API_KEY || "");
 
   const handleConvert = async () => {
     setLoading(true);
@@ -21,7 +23,7 @@ export default function App() {
       const converted = await convertEmail({
         rawText,
         tone: toneId,
-        apiKey: API_KEY,
+        apiKey,
       });
       setResult(converted);
     } catch (err) {
@@ -40,6 +42,10 @@ export default function App() {
             거친 메모 한 줄을 정중한 한국어 비즈니스 메일로 바꿔드립니다.
           </p>
         </header>
+
+        <div className="mb-6">
+          <ApiKeyPanel onKeyChange={setApiKey} />
+        </div>
 
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
           <div className="flex flex-col gap-6 rounded-xl border border-paper-line bg-white/40 p-5 shadow-sm">

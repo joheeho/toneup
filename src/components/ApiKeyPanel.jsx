@@ -20,15 +20,15 @@ export default function ApiKeyPanel({ onKeyChange }) {
 
   const handleSave = () => {
     if (!inputValue.trim()) {
-        setMessage("키를 입력해주세요.");
-        return;
+      setMessage("키를 입력해주세요.");
+      return;
     }
     const trimmed = inputValue.trim();
     localStorage.setItem(STORAGE_KEY, trimmed);
     setApiKey(trimmed);
-    onKeyChange?.(trimmed);   
+    onKeyChange?.(trimmed);
     setMessage("저장되었습니다.");
-};
+  };
 
   const handleLoad = () => {
     const saved = localStorage.getItem(STORAGE_KEY);
@@ -46,45 +46,63 @@ export default function ApiKeyPanel({ onKeyChange }) {
     localStorage.removeItem(STORAGE_KEY);
     setApiKey("");
     setInputValue("");
-    onKeyChange?.("");   
+    onKeyChange?.("");
     setMessage("삭제되었습니다.");
-};
+  };
 
   return (
     <div className="max-w-md mx-auto p-5 bg-paper rounded-xl border border-paper-line">
       <h3 className="mb-2 font-semibold text-base text-ink">API 키 설정</h3>
 
-      <input
-        type="password"
-        value={inputValue}
-        onChange={(e) => setInputValue(e.target.value)}
-        placeholder="API 키를 입력하세요"
-        className="w-full px-3 py-2 mb-3 border border-paper-line rounded-lg text-sm text-ink bg-paper focus:outline-none focus:ring-2 focus:ring-seal"
-       />
+      <div className="mb-3 flex gap-2">
+        <input
+          type={showKey ? "text" : "password"}
+          value={inputValue}
+          onChange={(e) => setInputValue(e.target.value)}
+          placeholder="API 키를 입력하세요"
+          className="w-full px-3 py-2 border border-paper-line rounded-lg text-sm text-ink bg-paper focus:outline-none focus:ring-2 focus:ring-seal"
+        />
+        <button
+          type="button"
+          onClick={() => setShowKey((v) => !v)}
+          className="shrink-0 rounded-lg border border-paper-line px-3 py-2 text-xs text-ink-soft hover:border-seal/50 hover:text-ink"
+        >
+          {showKey ? "숨기기" : "표시"}
+        </button>
+      </div>
 
-      <div className="flex gap-2 mb-3">
-      <button
-        onClick={handleSave}
-        className="px-4 py-2 rounded-lg bg-seal text-paper text-sm hover:opacity-90"
-      >
-        저장
-      </button>
-      <button
-        onClick={handleDelete}
-        className="px-4 py-2 rounded-lg border border-paper-line text-ink text-sm hover:bg-paper-line/20"
-      >
-        삭제
-      </button>
+      <div className="mb-3 flex gap-2">
+        <button
+          type="button"
+          onClick={handleSave}
+          className="px-4 py-2 rounded-lg bg-seal text-paper text-sm hover:opacity-90"
+        >
+          저장
+        </button>
+        <button
+          type="button"
+          onClick={handleLoad}
+          className="px-4 py-2 rounded-lg border border-paper-line text-ink text-sm hover:bg-paper-line/20"
+        >
+          불러오기
+        </button>
+        <button
+          type="button"
+          onClick={handleDelete}
+          className="px-4 py-2 rounded-lg border border-paper-line text-ink text-sm hover:bg-paper-line/20"
+        >
+          삭제
+        </button>
+      </div>
+
+      {message && <p className="text-sm text-ink/60">{message}</p>}
+
+      {!apiKey && (
+        <p className="mt-2 text-sm text-ink/40">
+          키를 입력하면 실제 변환이 됩니다.
+        </p>
+      )}
     </div>
-
-    {message && <p className="text-sm text-ink/60">{message}</p>}
-
-    {!apiKey && (
-      <p className="text-sm text-ink/40 mt-2">
-        키를 입력하면 실제 변환이 됩니다.
-      </p>
-    )}
-</div>
   );
 }
 
