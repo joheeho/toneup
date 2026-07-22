@@ -28,9 +28,10 @@
 - **상태 관리는 `useState`만** 사용합니다. Redux, Zustand, Context API 등 다른 상태 관리
   라이브러리는 쓰지 않습니다.
 - **백엔드 없음.** 서버 코드, API 라우트, DB가 없는 순수 프론트엔드(Vite) 앱입니다.
-- **Gemini 호출은 `openai` SDK(`^4.68.0`)로 합니다.** Google의 공식 SDK가 아니라, Gemini가
-  제공하는 OpenAI 호환 엔드포인트(`https://generativelanguage.googleapis.com/v1beta/openai/`)를
-  `openai` 패키지의 `OpenAI` 클라이언트로 호출하는 방식입니다. (`src/lib/convert.js` 참고)
+- **Claude 호출은 Anthropic 공식 SDK `@anthropic-ai/sdk`(`^0.112.5`)로 합니다.** 백엔드가 없어
+  브라우저에서 직접 호출하므로 `dangerouslyAllowBrowser: true` 옵션을 켭니다. 모델은
+  `claude-opus-4-8`을 씁니다. 응답 형식은 `output_config.format`(JSON Schema)으로 강제해서
+  `{subject, body}` 형태의 JSON이 항상 나오도록 합니다. (`src/lib/convert.js` 참고)
 
 ---
 
@@ -72,7 +73,7 @@ export async function convertEmail({ rawText, tone, apiKey }) {
 }
 ```
 
-- 입력: `rawText`(원문 메모), `tone`(톤 id 문자열), `apiKey`(Gemini API 키)
+- 입력: `rawText`(원문 메모), `tone`(톤 id 문자열), `apiKey`(Claude API 키)
 - 출력: `{ subject, body }` 형태의 객체 (Promise)
 - `App.jsx`에서 `convertEmail({ rawText, tone: toneId, apiKey: API_KEY })` 형태로 호출됩니다.
 
@@ -100,7 +101,7 @@ export const TONES = [
 아래 문단을 AI에게 그대로 전달하세요.
 
 > 이 프로젝트는 React + Vite + TailwindCSS v4 + JavaScript(.jsx)로만 되어 있고,
-> 상태 관리는 `useState`만 씁니다. 백엔드가 없고, Gemini는 `openai` SDK로 호출합니다.
+> 상태 관리는 `useState`만 씁니다. 백엔드가 없고, Claude는 `@anthropic-ai/sdk`로 호출합니다.
 > 위 스택을 벗어나는 제안(TypeScript, 다른 상태 관리 라이브러리, 다른 UI 프레임워크,
 > 백엔드 서버 추가 등)은 하지 마세요. **새로운 라이브러리(npm 패키지)를 추가하지 마세요.**
 > 이미 있는 것만으로 해결하세요. 코드를 고칠 때는 **파일 전체를 다시 쓰지 말고, 바뀐 부분만**
@@ -128,10 +129,11 @@ export const TONES = [
 
 ## 7. API 키
 
-- Gemini API 키는 **각자 Google AI Studio에서 직접 발급**받습니다.
+- Claude API 키는 **각자 Anthropic Console(console.anthropic.com)에서 직접 발급**받습니다.
 - 발급받은 키는 **다른 사람과 공유하지 않습니다.**
-- 키는 `.env.local` 파일에 `VITE_GEMINI_API_KEY=발급받은키` 형태로 저장합니다
-  (형식은 `.env.example` 참고).
+- 키는 `.env.local` 파일에 `VITE_CLAUDE_API_KEY=발급받은키` 형태로 저장합니다
+  (형식은 `.env.example` 참고). **반드시 `VITE_`로 시작해야** Vite가 브라우저 코드에서
+  읽을 수 있게 넘겨줍니다. 접두사 없이 저장하면 `import.meta.env`에서 `undefined`로 나옵니다.
 - **`.env.local` 파일은 절대 커밋하지 않습니다.** `git status`에서 이 파일이 보이면 `git add`
   대상에서 빼세요. 실수로 커밋/push했다면 `CONTRIBUTING.md`의 "실수했을 때 대처법"을 따라
   즉시 키를 폐기하고 새로 발급받으세요.
