@@ -1,10 +1,10 @@
-import { useState } from "react";
-import InputArea, { MAX_LENGTH } from "./components/InputArea.jsx";
+import { useState, useEffect } from "react";
+import InputArea from "./components/InputArea.jsx";
 import ToneSelector from "./components/ToneSelector.jsx";
 import ResultCard from "./components/ResultCard.jsx";
 import { convertEmail } from "./lib/convert.js";
 
-const API_KEY = import.meta.env.VITE_CLAUDE_API_KEY;
+const API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
 
 export default function App() {
   const [rawText, setRawText] = useState("");
@@ -13,8 +13,32 @@ export default function App() {
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-
+  const MAX_LENGTH = 200;
   const isOverLimit = rawText.length > MAX_LENGTH;
+  
+  const [favorites, setFavorites] = useState(() => {
+    const saved = localStorage.getItem("toneup-favorites");
+
+    if (!saved) return [];
+
+    try {
+      return JSON.parse(saved);
+    } catch {
+      return [];
+    }
+  });
+  
+  const [history, setHistory] = useState(() => {
+    const saved = localStorage.getItem("toneup-history");
+
+    if (!saved) return [];
+
+    try {
+      return JSON.parse(saved);
+    } catch {
+      return [];
+    }
+  });
 
   const handleConvert = async () => {
     setLoading(true);
@@ -27,12 +51,70 @@ export default function App() {
         language,
         apiKey: API_KEY,
       });
+
       setResult(converted);
+
+      const newHistory = [
+        {
+          id: Date.now(),
+          date: new Date().toLocaleString(),
+          tone: toneId,
+          rawText,
+          result: converted,
+        },
+        ...history,
+      ].slice(0, 10);
+
+      setHistory(newHistory);
+
+      localStorage.setItem(
+        "toneup-history",
+        JSON.stringify(newHistory)
+      );
+
     } catch (err) {
       setError(err.message);
     } finally {
       setLoading(false);
     }
+  };
+
+  // 히스토리 제거
+  const clearHistory = () => {
+    localStorage.removeItem("toneup-history");
+    setHistory([]);
+  };
+
+  // 즐겨찾기 저장 함수
+  const addFavorite = () => {
+    const text = rawText.trim();
+
+    if (!text) return;
+
+    if (favorites.includes(text)) return;
+
+    const newFavorites = [text, ...favorites].slice(0, 10);
+
+    setFavorites(newFavorites);
+
+    localStorage.setItem(
+      "toneup-favorites",
+      JSON.stringify(newFavorites)
+    );
+  };
+
+  // 즐겨찾기 제거 함수
+  const removeFavorite = (text) => {
+    const newFavorites = favorites.filter(
+      (item) => item !== text
+    );
+
+    setFavorites(newFavorites);
+
+    localStorage.setItem(
+      "toneup-favorites",
+      JSON.stringify(newFavorites)
+    );
   };
 
   return (
@@ -47,7 +129,13 @@ export default function App() {
 
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
           <div className="flex flex-col gap-6 rounded-xl border border-paper-line bg-white/40 p-5 shadow-sm">
-            <InputArea value={rawText} onChange={setRawText} />
+            <InputArea
+              value={rawText}
+              onChange={setRawText}
+              addFavorite={addFavorite}
+              favorites={favorites}
+              removeFavorite={removeFavorite}
+            />
 
             {/* 언어 선택 토글 영역 */}
             <div className="flex items-center justify-between rounded-lg border border-paper-line bg-white/60 p-3">
@@ -90,12 +178,59 @@ export default function App() {
             </button>
           </div>
 
+
           <div className="rounded-xl border border-paper-line bg-white/40 p-5 shadow-sm">
             <ResultCard
               result={result}
               loading={loading}
               error={error}
             />
+
+            <div className="mt-6 border-t border-paper-line pt-4">
+              <div className="mb-3 flex items-center justify-between">
+                <h2 className="font-semibold text-ink">
+                  최근 변환 내역
+                </h2>
+
+                {history.length > 0 && (
+                  <button
+                    onClick={clearHistory}
+                    className="rounded-lg border border-paper-line px-3 py-1 text-xs"
+                  >
+                    전체 삭제
+                  </button>
+                )}
+              </div>
+
+              {history.length === 0 ? (
+                <p className="text-sm text-ink-soft">
+                  아직 저장된 변환 내역이 없습니다.
+                </p>
+              ) : (
+                <div className="space-y-2">
+                  {history.map((item) => (
+                    <button
+                      key={item.id}
+                      type="button"
+                      onClick={() => setResult(item.result)}
+                      className="w-full rounded-lg border border-paper-line p-3 text-left transition hover:bg-paper"
+                    >
+                      <div className="text-xs text-ink-soft">
+                        {item.date}
+                      </div>
+
+                      <div className="mt-1 font-medium">
+                        {item.result.subject}
+                      </div>
+
+                      <div className="mt-1 text-sm text-ink-soft line-clamp-2">
+                        {item.rawText}
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
