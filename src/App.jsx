@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
-import InputArea from "./components/InputArea.jsx";
+import InputArea, { MAX_LENGTH } from "./components/InputArea.jsx";
 import ToneSelector from "./components/ToneSelector.jsx";
 import ResultCard from "./components/ResultCard.jsx";
 import { convertEmail } from "./lib/convert.js";
 
-const API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
+const API_KEY = import.meta.env.VITE_CLAUDE_API_KEY;
 
 export default function App() {
   const [rawText, setRawText] = useState("");
@@ -13,7 +13,6 @@ export default function App() {
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const MAX_LENGTH = 200;
   const isOverLimit = rawText.length > MAX_LENGTH;
   
   const [favorites, setFavorites] = useState(() => {
