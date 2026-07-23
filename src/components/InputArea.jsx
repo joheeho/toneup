@@ -6,9 +6,15 @@ const EXAMPLES = [
 ];
 
 // 단일 출처(Single Source of Truth)로 관리하기 위해 export
-export const MAX_LENGTH = 500;
+export const MAX_LENGTH = 200;
 
-export default function InputArea({ value, onChange }) {
+export default function InputArea({ 
+    value, 
+    onChange,
+    addFavorite,
+    favorites,
+    removeFavorite, 
+    }) {
   const isAtLimit = value.length >= MAX_LENGTH;
 
   return (
@@ -57,6 +63,50 @@ export default function InputArea({ value, onChange }) {
             {example}
           </button>
         ))}
+      </div>
+      
+      {/* 즐겨찾기 */}
+      <div className="rounded-lg border border-paper-line p-3">
+        <div className="mb-2 flex items-center justify-between">
+          <span className="text-sm font-semibold">
+            ⭐ 즐겨찾기
+          </span>
+
+          <button
+            type="button"
+            onClick={addFavorite}
+            className="text-xs rounded border px-2 py-1"
+          >
+            현재 문장 저장
+          </button>
+        </div>
+
+        <div className="flex flex-wrap gap-2">
+          {favorites.map((item) => (
+            <div
+              key={item}
+              className="flex items-center gap-1"
+            >
+              <button
+                type="button"
+                onClick={() => onChange(item)}
+                className="rounded-full border border-paper-line px-3 py-1 text-xs hover:bg-paper"
+              >
+                {item.length > 20
+                  ? item.slice(0, 20) + "..."
+                  : item}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => removeFavorite(item)}
+                className="text-xs text-red-500"
+              >
+                ✕
+              </button>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
