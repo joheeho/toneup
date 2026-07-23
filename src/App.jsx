@@ -13,6 +13,21 @@ export default function App() {
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const MAX_LENGTH = 200;
+  const isOverLimit = rawText.length > MAX_LENGTH;
+  
+  const [favorites, setFavorites] = useState(() => {
+    const saved = localStorage.getItem("toneup-favorites");
+
+    if (!saved) return [];
+
+    try {
+      return JSON.parse(saved);
+    } catch {
+      return [];
+    }
+  });
+  
   const [history, setHistory] = useState(() => {
     const saved = localStorage.getItem("toneup-history");
 
@@ -64,9 +79,42 @@ export default function App() {
     }
   };
 
+  // 히스토리 제거
   const clearHistory = () => {
     localStorage.removeItem("toneup-history");
     setHistory([]);
+  };
+
+  // 즐겨찾기 저장 함수
+  const addFavorite = () => {
+    const text = rawText.trim();
+
+    if (!text) return;
+
+    if (favorites.includes(text)) return;
+
+    const newFavorites = [text, ...favorites].slice(0, 10);
+
+    setFavorites(newFavorites);
+
+    localStorage.setItem(
+      "toneup-favorites",
+      JSON.stringify(newFavorites)
+    );
+  };
+
+  // 즐겨찾기 제거 함수
+  const removeFavorite = (text) => {
+    const newFavorites = favorites.filter(
+      (item) => item !== text
+    );
+
+    setFavorites(newFavorites);
+
+    localStorage.setItem(
+      "toneup-favorites",
+      JSON.stringify(newFavorites)
+    );
   };
 
   return (
@@ -81,7 +129,13 @@ export default function App() {
 
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
           <div className="flex flex-col gap-6 rounded-xl border border-paper-line bg-white/40 p-5 shadow-sm">
-            <InputArea value={rawText} onChange={setRawText} />
+            <InputArea
+              value={rawText}
+              onChange={setRawText}
+              addFavorite={addFavorite}
+              favorites={favorites}
+              removeFavorite={removeFavorite}
+            />
 
             {/* 언어 선택 토글 영역 */}
             <div className="flex items-center justify-between rounded-lg border border-paper-line bg-white/60 p-3">
